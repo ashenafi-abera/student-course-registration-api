@@ -1,0 +1,14 @@
+#%RAML 1.0 Library
+
+uses:
+  coursesLibrary: courses.raml
+types:
+  registerStudentCourseRequest:
+    properties:
+      studentId:
+        type: number
+        required: true
+      courses:
+        items: coursesLibrary.coursesRequest
+        type: array
+ 
