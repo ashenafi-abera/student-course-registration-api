@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="create-course-information-implementationFlow" doc:id="6d2d766f-fef1-478b-8e82-287cb6bd8b73" >
+		<logger level="INFO" doc:name="Logger" doc:id="030ad0db-194f-4e50-ad10-3735a6c12985" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="6e2fd1d7-d0c5-4936-a3af-49252c7adb24" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+  courseId: payload.courseId,
+  courseName:  payload.courseName,
+  code:  payload.code,
+  creditHours:  payload.creditHours
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="601e285e-777d-429d-abd2-2a6ee68f1248" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO student_registration.course(courseId, courseName, code, creditHours) VALUES (:courseId, :courseName, :code, :creditHours)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="adaba2c1-8cdb-4bbd-ada2-4b8e4158ca43" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+    success: true,
+    timeStamp: now(),
+    message: "Course information created successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f80b37c8-94d0-4906-9c7c-fdcca1374f52" message="#[payload]"/>
+	</flow>
+	<flow name="get-all-courses-information-implementationFlow" doc:id="e5099aca-e04a-4c83-bc6b-9c08fe6bddfd" >
+		<logger level="INFO" doc:name="Logger" doc:id="6b6912e6-b818-43b3-b01e-a9c9d560b1c5" message="#[payload]"/>
+		<db:select doc:name="Select" doc:id="1b8a08b6-9095-4b13-8780-39a71d7f03fe" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM student_registration.course]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="df8b0254-44a0-49b7-a60f-bd0330a1d719" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	status: {
+		success: true,
+		timeStamp: now()
+	},
+  
+  getCoursesInformation: payload map () -> {
+		courseId: $.courseId,
+		courseName: $.courseName,
+		code: $.code,
+		creditHours: $.creditHours
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9839a35e-4a04-430c-90d4-4dfbc874502e" message="#[payload]"/>
+	</flow>
+	<flow name="get-course-information-byId-implementationFlow" doc:id="62bef2da-05fb-4026-b7b5-b1ceaae76598" >
+		<logger level="INFO" doc:name="Logger" doc:id="9a3a4fa9-798e-4220-8e23-f2eeb49dcc2b" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="fe5b8ee8-e02c-413f-9c19-f333657c1080" variableName="id"/>
+		<db:select doc:name="Select" doc:id="ba04c798-d062-4afe-b23e-0626684a40ca" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM student_registration.course WHERE courseId = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: vars.id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="3d61c593-f36f-4cc0-955f-38baa7014d0d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+if (payload.courseId != null ) {
+	status: {
+		success: true,
+		timeStamp: now()
+	},
+	getCoursesInformation: {
+		id: vars.id,
+		courseId: payload[0].courseId,
+		courseName: payload[0].courseName,
+		code: payload[0].code,
+		creditHours: payload[0].creditHours
+	}
+}
+else {
+	status: {
+		id: vars.id,
+		success: false,
+		timeStamp: now(),
+		message: "Course information doesn't exists"
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5384d0c5-b113-417a-ad81-328e530c42b8" message="#[payload]"/>
+	</flow>
+	<flow name="update-course-information-implementationFlow" doc:id="f3b1f63c-272c-4387-86ce-77264b794afd" >
+		<logger level="INFO" doc:name="Logger" doc:id="6d3f76ae-345c-4d98-a1d9-ea9b24a2582b" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="b3de47d7-dcbf-4380-b4ab-d8ab70512579" variableName="id"/>
+		<ee:transform doc:name="Transform Message" doc:id="64797754-bc0c-4087-a16a-d73bd1fadb83" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+  id: vars.id,
+  courseId: payload.courseId,
+  courseName:  payload.courseName,
+  code:  payload.code,
+  creditHours:  payload.creditHours
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:update doc:name="Update" doc:id="1ec9d250-f7c0-4fa8-9d9a-99eed64ee3da" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE student_registration.course
+SET courseId = :courseId, courseName = :courseName, code = :code, creditHours = :creditHours
+WHERE courseId = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="7ceb135b-8b32-4020-8edb-c87aa3f4abb2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+  	id: vars.id,
+    success: true,
+    timeStamp: now(),
+    message: "Course information updated successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2599e9dc-e654-46d7-86d9-233a744e24d3" message="#[payload]"/>
+	</flow>
+	<flow name="delete-course-information-implementationFlow" doc:id="259c886b-537d-4cdb-9b99-955c7970f9f0" >
+		<logger level="INFO" doc:name="Logger" doc:id="fb36420b-e48f-4d07-8946-7a5d8ecb0a41" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="574d9503-8d8a-44f8-90df-3f00f082a66e" variableName="id"/>
+		<db:delete doc:name="Delete" doc:id="7eec3bc8-c1c0-4701-b8d4-04300445faa3" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM student_registration.course WHERE courseId = :ID]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: vars.id
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="5019257b-e0e2-45de-9ba5-ccc002c5a8e0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+  	id: vars.id,
+    success: true,
+    timeStamp: now(),
+    message: "Course information deleted successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4bb0ace7-b4da-44f1-8be1-ee8c107faa43" message="#[payload]"/>
+	</flow>
+</mule>
