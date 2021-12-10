@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+
+types:
+  retrieveCourseResponse:
+    properties:
+      courseId:
+        type: number
+        required: true
+      courseName:
+        type: string
+      code:
+        type: any
+        required: false
+      creditHours:
+        type: number
+        required: true

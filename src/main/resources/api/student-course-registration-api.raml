@@ -1,0 +1,124 @@
+#%RAML 1.0
+title: student-course-registration-api
+
+uses:
+  studentRegistration: /exchange_modules/2dff6523-a483-4160-8fd1-055401dae744/student-registration-components/1.0.2/student-registration-components.raml
+
+mediaType:
+  - application/json
+traits:
+  client-id-requeired: !include /exchange_modules/2dff6523-a483-4160-8fd1-055401dae744/client-id-enforcement/1.0.1/client-id-enforcement.raml
+
+
+/student:
+  description: This resource is used to create a student information in MySql databse.
+  post:
+    is:
+      - client-id-requeired
+    description: This method is used for sending request to MySql databse and returns a status response of a student information.
+    body:
+      application/json: studentRegistration.registerStudentRequest
+    responses:
+      200:
+        body:
+          application/json: studentRegistration.registerStudentResponse
+  get:
+    is:
+      - client-id-requeired
+    description: This method is used for fetching student information from MySql databse.
+    responses:
+      200:
+        body:
+          application/json: studentRegistration.retrieveStudentResponse
+  /{id}:
+    description: This nested resource is used to fetch, update and delete student information in databse.
+    get:
+      is:
+        - client-id-requeired
+      description: This method is used for fetching student information from MySql databse.
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.retrieveStudentResponse
+        
+    put:
+      is:
+        - client-id-requeired
+      description: This method is used for updating student's information in MySql databse.
+      body:
+        application/json: studentRegistration.updateStudentRequest
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.updateStudentResponse
+    delete:
+      is:
+        - client-id-requeired
+      description: This method is used for deleting student's information from MySql databse.
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.deleteStudentResponse
+/course:
+  description: This resource is used to register course in MySql databse.
+  post:
+    is:
+      - client-id-requeired
+    description: This method is used for sending request to MySql databse and returns a status response of a course information.
+    body:
+      application/json: studentRegistration.registerCourseRequest
+    responses:
+      200:
+        body:
+          application/json: studentRegistration.registerCourseResponse
+  get:
+    is:
+      - client-id-requeired
+    description: This method is used for fetching course information from MySql databse.
+    responses:
+      200:
+        body:
+          application/json: studentRegistration.retrieveCourseResponse
+  /{id}:
+    description: This nested resource is used to fetch, update and delete course information in databse.
+    get:
+      is:
+        - client-id-requeired
+      description: This method is used for fetching course information from MySql databse.
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.retrieveCourseResponse
+        
+    put:
+      is:
+        - client-id-requeired
+      description: This method is used for updating course's information in MySql databse.
+      body:
+        application/json: studentRegistration.updateCourseRequest
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.updateCourseResponse
+    delete:
+      is:
+        - client-id-requeired
+      description: This method is used for deleting course's information from MySql databse.
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.deleteCourserResponse
+
+  /register:
+    description: This resource is used to register student's courses information in MySql databse
+    post:
+      is:
+        - client-id-requeired
+      description: This method is used for sending request to MySql databse and returns a status response of a student that register courses information.
+      body:
+        application/json: studentRegistration.registerStudentCourseRequest
+      responses:
+        200:
+          body:
+            application/json: studentRegistration.registerStudentCourseResponse
+  

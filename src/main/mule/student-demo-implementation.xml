@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="create-student-demo-implementationFlow" doc:id="8a6571a9-170e-4d84-993e-ea1b6342f7b0" >
+		<logger level="INFO" doc:name="Logger" doc:id="a5eed712-c3b3-4a20-b697-7a5ca614a987" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="584c1ddc-ef38-4118-93f8-9a3beca372c2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+  studentId: payload.studentId,
+  firstName: payload.firstName,
+  lastName: payload.lastName,
+  sex: payload.sex,
+  age: payload.age,
+  department: payload.department
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="c9d90320-8fe3-4ab2-befb-ab0ab8093ee9" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO student_registration.student_demographics(studentId, firstName, lastName, sex, age, department) VALUE (:studentId, :firstName, :lastName, :sex, :age, :department)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="78a34868-f03d-45cb-b288-af03d94a4908" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+    success: true,
+    timeStamp: now(),
+    message: "Student information created successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="bc9aac8c-934a-49dd-ba5f-99d03d6ee6c4" message="#[payload]"/>
+	</flow>
+	<flow name="get-all-students-demo-implementationFlow" doc:id="bedad71e-e1d8-4016-848e-7879440393a3" >
+		<logger level="INFO" doc:name="Logger" doc:id="83411131-6c15-4de4-bae7-9662cc2a4841" message="#[payload]"/>
+		<db:select doc:name="Select" doc:id="cccea839-e0ea-47e1-9576-b00e146b390e" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM student_registration.student_demographics;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="5fb4ca20-994a-4968-8d97-6be0c8f49775" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn = "everywhere"
+---
+{
+	status: {
+		success: true,
+		timeStamp: now()
+	},
+	getUserResponse: payload map () -> {
+		studentId: $.studentId,
+		firstName: $.firstName,
+		lastName: $.lastName,
+		age: $.age,
+		sex: $.sex,
+		department: $.department
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e125d807-b10c-4f3a-aae0-1e8ed5514b0c" message="#[payload]"/>
+	</flow>
+	<flow name="getl-students-demo-byId-implementationFlow" doc:id="8ce49173-b605-41a3-b938-70b1651e67d0" >
+		<logger level="INFO" doc:name="Logger" doc:id="351e841a-f16f-47bd-b9b0-0b636e2d288c" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="cba2d5b9-ab3d-4b5c-bf13-ace25fc8ede9" variableName="id"/>
+		<db:select doc:name="Select" doc:id="3e177464-f07e-4d13-a832-fb4dd1717432" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM student_registration.student_demographics
+WHERE studentId= :ID;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: vars.id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="d06b8e7c-1109-4b7a-8756-92e18f0444d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn = "everywhere"
+---
+if ( payload.studentId != null ) {
+	status: {
+		success: true,
+		timeStamp: now()
+	},
+	getUserResponse: {
+		studentId: payload[0].studentId,
+		firstName: payload[0].firstName,
+		lastName: payload[0].lastName,
+		age: payload[0].age,
+		sex: payload[0].sex,
+		department: payload[0].department
+	}
+}
+	
+else {
+	status: {
+		success: false,
+		timeStamp: now(),
+		message: "User doesn't exist"
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e7f9a1d1-d476-4a86-b682-d8dba9a4d22d" message="#[payload]"/>
+	</flow>
+	<flow name="update-students-demo-implementationFlow" doc:id="0006c72c-fafe-4a69-9943-d36e09fb53c8" >
+		<logger level="INFO" doc:name="Logger" doc:id="a9155e74-05c9-4902-9723-ee95e247c047" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="5375ee03-4964-4509-8e77-bc907540c095" variableName="id"/>
+		<ee:transform doc:name="Transform Message" doc:id="c8e610dc-0aed-4e3a-94d2-8ecbf653ddd3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+  id: vars.id,
+  studentId: payload.studentId,
+  firstName: payload.firstName,
+  lastName: payload.lastName,
+  sex: payload.sex,
+  age: payload.age,
+  department: payload.department
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:update doc:name="Update" doc:id="c7695cfd-a46e-4e49-b857-604c0cff0caf" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE student_registration.student_demographics
+SET studentId = :studentId, firstName = :firstName, lastName = :lastName, age = :age, sex = :sex, department = :department
+WHERE studentId = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="e9e2282e-4e04-477c-930c-206e71988cb9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+  	studentId: vars.id,
+    success: true,
+    timeStamp: now(),
+    message: "Student information updated successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="1ee52b5c-f1c1-4c03-bf42-0f6d3f05048f" message="#[payload]"/>
+	</flow>
+	<flow name="delete-students-demo-implementationFlow" doc:id="04263906-69e5-41df-9149-39b2c700d5ad" >
+		<logger level="INFO" doc:name="Logger" doc:id="1e7141ab-640e-4b92-ab1e-62a5cab81139" message="#[payload]"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set Variable" doc:id="8075d4e0-fce1-4c44-8393-f80cdf7d91cf" variableName="id"/>
+		<db:delete doc:name="Delete" doc:id="d5f1c548-df39-4f6c-a3ad-33d0d7189a26" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM  student_registration.student_demographics WHERE studentId = :ID;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: vars.id
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="1b59bd00-e728-4e4c-9886-1a1f94aeafd0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: {
+  	studentId: vars.id,
+    success: true,
+    timeStamp: now(),
+    message: "Student information deleted successfully"
+  }
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6464d8af-21f1-4aee-8947-b240a591665b" message="#[payload]"/>
+	</flow>
+</mule>
