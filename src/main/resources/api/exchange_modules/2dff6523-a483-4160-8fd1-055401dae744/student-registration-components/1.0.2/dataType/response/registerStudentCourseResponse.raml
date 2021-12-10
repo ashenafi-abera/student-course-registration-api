@@ -1,0 +1,14 @@
+#%RAML 1.0 Library
+
+types:
+  registerStudentCourseResponse:
+    properties:
+      status:
+        type: object
+        properties:
+          success:
+            type: boolean
+          timeStamp:
+            type: datetime
+          message:
+            type: string

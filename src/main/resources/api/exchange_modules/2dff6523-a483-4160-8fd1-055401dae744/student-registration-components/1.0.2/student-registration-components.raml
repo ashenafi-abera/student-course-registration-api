@@ -1,0 +1,62 @@
+#%RAML 1.0 Library
+
+uses:
+  registerCourseRequestLibrary: dataType/request/registerCourseRequest.raml
+  registerCourseResponseLibrary: dataType/response/registerCourseResponse.raml
+  updateCourseRequestLibrary: dataType/request/updateCourseRequest.raml
+  updateCourseResponseLibrary: dataType/response/updateCourseResponse.raml
+  registerStudentRequestLibrary: dataType/request/registerStudentRequest.raml
+  registerStudentResponseLibrary: dataType/response/registerStudentResponse.raml
+  updateStudentRequestLibrary: dataType/request/updateStudentRequest.raml
+  updateStudentResponseLibrary: dataType/response/updateStudentResponse.raml
+  registerStudentCourseRequestLibrary: dataType/request/registerStudentCourseRequest.raml
+  registerStudentCourseResponseLibrary: dataType/response/registerStudentCourseResponse.raml
+  retrieveCourseResponseLibrary: dataType/response/retrieveCourseResponse.raml
+  retrieveStudentResponseLibrary: dataType/response/retrieveStudentResponse.raml
+  deleteCourserResponseLibrary: dataType/response/deleteCourserResponse.raml
+  deleteStudentResponseLibrary: dataType/response/deleteStudentResponse.raml
+
+
+types:
+  registerCourseRequest:
+    type: registerCourseRequestLibrary.registerCourseRequest
+    example: !include examples/request/registerCourseRequest.raml
+  registerCourseResponse:
+    type: registerCourseResponseLibrary.registerCourseResponse
+    example: !include examples/response/registerCourseResponse.raml
+  updateCourseRequest:
+    type: updateCourseRequestLibrary.updateCourseRequest
+    example: !include examples/request/updateCourseRequest.raml
+  updateCourseResponse:
+    type: updateCourseResponseLibrary.updateCourseResponse
+    example: !include examples/response/updateCourseResponse.raml
+  registerStudentRequest:
+    type: registerStudentRequestLibrary.registerStudentRequest
+    example: !include examples/request/registerStudentRequest.raml
+  registerStudentResponse:
+    type: registerStudentResponseLibrary.registerStudentResponse
+    example: !include examples/response/registerStudentResponse.raml
+  updateStudentRequest:
+    type: updateStudentRequestLibrary.studentUpdateRequest
+    example: !include examples/request/updateStudentRequest.raml
+  updateStudentResponse:
+    type: updateStudentResponseLibrary.updateStudentResponse
+    example: !include examples/response/updateStudentResponse.raml
+  registerStudentCourseRequest:
+    type: registerStudentCourseRequestLibrary.registerStudentCourseRequest
+    example: !include examples/request/registerStudentCourseRequest.raml
+  registerStudentCourseResponse:
+    type: registerStudentCourseResponseLibrary.registerStudentCourseResponse
+    example: !include examples/response/registerStudentCourseResponse.raml
+  retrieveCourseResponse:
+    type: retrieveCourseResponseLibrary.retrieveCourseResponse
+    example: !include examples/response/retrieveCourseResponse.raml
+  retrieveStudentResponse:
+    type: retrieveStudentResponseLibrary.retrieveStudentResponse
+    example: !include examples/response/retrieveStudentResponse.raml
+  deleteCourserResponse:
+    type: deleteCourserResponseLibrary.deleteCourserResponse
+    example: !include examples/response/deleteCourserResponse.raml
+  deleteStudentResponse:
+    type: deleteStudentResponseLibrary.deleteStudentResponse
+    example: !include examples/response/deleteStudentResponse.raml
